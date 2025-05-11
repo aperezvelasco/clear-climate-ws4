@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 np.float = float
 
+
 def load_datasets(data_dir, prefix="t2m_None", resolution="era5", year_filter=None):
     pattern = os.path.join(data_dir, f"{prefix}_{resolution}_*_0p*.nc")
     files = sorted(glob.glob(pattern))
@@ -23,9 +24,11 @@ def load_datasets(data_dir, prefix="t2m_None", resolution="era5", year_filter=No
     ds = xr.open_mfdataset(files, combine="by_coords")
     return ds
 
+
 def save_dataset(ds, path):
     print(f"Saving to {path}")
     ds.to_netcdf(path)
+
 
 def main():
     base_dir = "~/data/clear-climate/serbia"
@@ -38,7 +41,7 @@ def main():
     # Load pre-2019 datasets
     era5_pre = load_datasets(era5_dir, resolution="era5", year_filter="<2019")
     cerra_pre = load_datasets(cerra_dir, resolution="cerra", year_filter="<2019")
-    era5_pre = era5_pre.sel(time=cerra_pre.time.values)
+    era5_pre = era5_pre.sel(time=cerra_pre.time)
 
     total_time = era5_pre.time.size
     indices = np.random.permutation(total_time)
@@ -54,7 +57,7 @@ def main():
     # Load and save test set (2019 only)
     era5_test = load_datasets(era5_dir, resolution="era5", year_filter="=2019")
     cerra_test = load_datasets(cerra_dir, resolution="cerra", year_filter="=2019")
-    era5_test = era5_test.sel(time=cerra_test.time.values)
+    era5_test = era5_test.sel(time=cerra_test.time)
 
     save_dataset(train_era5, os.path.join(out_dir, "train_era5.nc"))
     save_dataset(train_cerra, os.path.join(out_dir, "train_cerra.nc"))
