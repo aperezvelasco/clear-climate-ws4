@@ -1,0 +1,20 @@
+# Core Python packages
+xarray
+netCDF4
+dask
+numpy
+pandas
+matplotlib
+cartopy
+tqdm
+jupyterlab
+xesmf
+
+# PyTorch stack (CPU or GPU version – see notes below)
+torch
+torchvision
+torchaudio
+
+# Pip-only dependencies
+einops
+xbatcher
