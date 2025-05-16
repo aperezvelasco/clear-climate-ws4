@@ -9,12 +9,14 @@ cartopy
 tqdm
 jupyterlab
 xesmf
+einops
+xbatcher
 
-# PyTorch stack (CPU or GPU version – see notes below)
+# PyTorch stack
 torch
 torchvision
 torchaudio
 
-# Pip-only dependencies
-einops
-xbatcher
+# Explainability libraries
+quantus
+captum
