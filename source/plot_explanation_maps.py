@@ -1,27 +1,61 @@
 import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import xarray as xr
+import numpy as np
 
 
 def plot_explanation_map(
-    attr, title, cmap="Oranges", filename=None, pixel_coords=None
+    attr,
+    title,
+    input_lats=None,
+    input_lons=None,
+    pixel_coords=None,
+    cmap="Oranges",
+    filename=None,
 ):
-    fig, ax = plt.subplots(1, 1, figsize=(10, 8), constrained_layout=False)
-
+    # Convert numpy to xarray.DataArray
     data = attr[0, 0, :, :]
-    im = ax.imshow(data, cmap=cmap, vmin=data.min(), vmax=data.max())
-    ax.set_title(title)
-    ax.axis("off")
+    da = xr.DataArray(
+        data,
+        dims=("lat", "lon"),
+        coords={"lat": input_lats, "lon": input_lons},
+        name="attribution",
+    )
 
-    # Add black dot at pixel
+    fig = plt.figure(figsize=(8, 6))
+    ax = plt.axes(projection=ccrs.PlateCarree())
+
+    # Plot attribution
+    im = da.plot.pcolormesh(
+        ax=ax,
+        transform=ccrs.PlateCarree(),
+        cmap=cmap,
+        add_colorbar=True,
+        cbar_kwargs={"orientation": "horizontal", "label": "Attribution Value"},
+    )
+
+    ax.coastlines(resolution="10m", linestyle="-", linewidths=0.5)
+    ax.add_feature(cfeature.BORDERS, linestyle="-", linewidth=0.5)
+
+    # Optional pixel highlight
     if pixel_coords:
-        y, x = pixel_coords
-        ax.plot(x, y, marker="o", color="black", markersize=5)
+        lat_idx, lon_idx = pixel_coords
+        lat_val = input_lats[lat_idx]
+        lon_val = input_lons[lon_idx]
+        ax.plot(
+            lon_val,
+            lat_val,
+            marker="o",
+            color="black",
+            markersize=6,
+            transform=ccrs.PlateCarree(),
+        )
 
-    # Colorbar below
-    cbar_ax = fig.add_axes([0.1, 0.05, 0.8, 0.05])  # [left, bottom, width, height]
-    cbar = fig.colorbar(im, cax=cbar_ax, orientation="horizontal")
-    cbar.set_label("Attribution Value")
-
-    plt.savefig(filename, dpi=300, bbox_inches="tight")
-    plt.close()
+    if filename:
+        plt.savefig(filename, dpi=300, bbox_inches="tight")
+        plt.close()
+    else:
+        plt.show()
 
     return filename
