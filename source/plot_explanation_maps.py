@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
-import xarray as xr
 import numpy as np
+import xarray as xr
 
 
 def plot_explanation_map(
@@ -13,9 +13,17 @@ def plot_explanation_map(
     pixel_coords=None,
     cmap="Oranges",
     filename=None,
+    vmin=None,
+    vmax=None,
+    cbar_label="Attribution Value",
 ):
+
     # Convert numpy to xarray.DataArray
     data = attr[0, 0, :, :]
+    if vmin is None:
+        vmin = np.nanmin(data)
+    if vmax is None:
+        vmax = np.nanmax(data)
     da = xr.DataArray(
         data,
         dims=("lat", "lon"),
@@ -27,18 +35,20 @@ def plot_explanation_map(
     ax = plt.axes(projection=ccrs.PlateCarree())
 
     # Plot attribution
-    im = da.plot.pcolormesh(
+    mesh = da.plot.pcolormesh(
         ax=ax,
         transform=ccrs.PlateCarree(),
         cmap=cmap,
-        add_colorbar=True,
-        cbar_kwargs={"orientation": "horizontal", "label": "Attribution Value"},
+        vmin=vmin,
+        vmax=vmax,
+        add_colorbar=False  # Disable automatic colorbar
     )
 
+    # Add coastlines and borders
     ax.coastlines(resolution="10m", linestyle="-", linewidths=0.5)
     ax.add_feature(cfeature.BORDERS, linestyle="-", linewidth=0.5)
 
-    # Optional pixel highlight
+    # Optional pixel marker
     if pixel_coords:
         lat_idx, lon_idx = pixel_coords
         lat_val = input_lats[lat_idx]
@@ -52,6 +62,16 @@ def plot_explanation_map(
             transform=ccrs.PlateCarree(),
         )
 
+    # Add title
+    ax.set_title(title, fontsize=15)
+
+    # Add manual colorbar
+    cbar_position = [0.15, 0.05, 0.7, 0.05]
+    cbar_ax = fig.add_axes(cbar_position)
+    cbar = fig.colorbar(mesh, cax=cbar_ax, orientation="horizontal")
+    cbar.set_label(cbar_label, fontsize=12)
+
+    # Save or show
     if filename:
         plt.savefig(filename, dpi=300, bbox_inches="tight")
         plt.close()
@@ -59,3 +79,4 @@ def plot_explanation_map(
         plt.show()
 
     return filename
+
