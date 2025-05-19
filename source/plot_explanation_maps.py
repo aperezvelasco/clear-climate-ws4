@@ -50,7 +50,7 @@ def plot_explanation_map(
         cmap=cmap,
         vmin=vmin,
         vmax=vmax,
-        add_colorbar=False  # Disable automatic colorbar
+        add_colorbar=False,  # Disable automatic colorbar
     )
 
     # Add coastlines and borders
@@ -88,4 +88,3 @@ def plot_explanation_map(
         plt.show()
 
     return filename
-
