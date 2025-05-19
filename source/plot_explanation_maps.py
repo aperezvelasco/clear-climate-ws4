@@ -11,7 +11,6 @@ def plot_explanation_map(
     input_lats=None,
     input_lons=None,
     pixel_coords=None,
-    cmap="Oranges",
     filename=None,
     vmin=None,
     vmax=None,
@@ -24,6 +23,16 @@ def plot_explanation_map(
         vmin = np.nanmin(data)
     if vmax is None:
         vmax = np.nanmax(data)
+
+    if vmin < 0 < vmax:
+        cmap = "RdBu_r"
+        if abs(vmin) > abs(vmax):
+            vmax = abs(vmin)
+        else:
+            vmin = -vmax
+    else:
+        cmap = "Oranges"
+
     da = xr.DataArray(
         data,
         dims=("lat", "lon"),
